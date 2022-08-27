@@ -1,1 +1,112 @@
+#define MAX_HASH 373757
 
+#include <iostream>
+#include <string>
+#include <unordered_map>
+
+#include <Windows.h>
+#include <cstdlib>
+#include <ctime>
+
+using namespace std;
+
+LARGE_INTEGER frequency;
+double lapsed;
+
+int fastMod(unsigned int input, int max){
+	if (input >= max){
+		return input % max;
+	}
+	else {
+		return input;
+	}
+}
+
+int multHash(string s){
+	unsigned int hash = 0;
+	for (int i = 0; i < 6; i++){
+		hash = 31 * hash + s[i];
+	}
+	return fastMod(hash, MAX_HASH - 1);
+}
+
+int bitShiftHash(string s){
+	unsigned int hash = s[0] - 'a';
+	for (int i = 0; i < 6; i++){
+		hash <<= 5;
+		hash = hash | (s[i] - 'a');
+	}
+	return fastMod(hash, MAX_HASH - 1);
+}
+
+/*
+	6 character string on various hashing methods:
+	stl hash, bit shift, prime multiplication
+*/
+string wordBank[123123];
+
+int manualHashMap[MAX_HASH];
+unordered_map<string, int> stlHashMap;
+
+void main() {
+
+	// Generate 123123 random string of length 6
+	srand(time(0));
+	cout << "Generate 123123 random string of length 6" << "\n";
+	for (int i = 0; i < 123123; i++){
+		string tempString;
+		for (int j = 0; j < 6; j++){
+			char tempChar = 97 + (rand() % 10);
+			tempString.push_back(tempChar);
+		}
+		wordBank[i] = tempString;
+	}
+///////////////////////////////////////////////////////
+
+	// Launch the normal unordered_map string
+	QueryPerformanceFrequency(&frequency);
+
+	LARGE_INTEGER start;
+	QueryPerformanceCounter(&start);
+
+	for (int i = 0; i < 123123; i++){
+		stlHashMap.insert({ wordBank[i], i });
+	}
+
+	LARGE_INTEGER end;
+	QueryPerformanceCounter(&end);
+
+	// for microseconds use 1000000.0
+	lapsed = static_cast<double>(end.QuadPart - start.QuadPart) /
+		frequency.QuadPart; // in seconds
+	cout << "Stl hash map: " << lapsed << "\n";
+//////////////////////////////////////////////////////////
+
+	// Launch bit shift hash function
+	QueryPerformanceCounter(&start);
+	for (int i = 0; i < 123123; i++){
+		manualHashMap[bitShiftHash(wordBank[i])] = i;
+	}
+	QueryPerformanceCounter(&end);
+
+	// for microseconds use 1000000.0
+	lapsed = static_cast<double>(end.QuadPart - start.QuadPart) /
+		frequency.QuadPart; // in seconds
+	cout << "Manual Bitshift hash map: " << lapsed << "\n";
+//////////////////////////////////////////////////////////
+
+	// Launch mult hash function
+	QueryPerformanceCounter(&start);
+	for (int i = 0; i < 123123; i++){
+		manualHashMap[multHash(wordBank[i])] = i;
+	}
+	QueryPerformanceCounter(&end);
+
+	// for microseconds use 1000000.0
+	lapsed = static_cast<double>(end.QuadPart - start.QuadPart) /
+		frequency.QuadPart; // in seconds
+	cout << "Manual Mult hash map: " << lapsed << "\n";
+
+	int a;
+	cin >> a;
+}
