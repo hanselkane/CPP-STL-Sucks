@@ -1,3 +1,3 @@
-# CPP-STL-Sucks
+# CPP-STL-VS-Manual
 
-These are proofs that cpp stl is slow af, unsuitable for competitive programming.
+Performance comparison on various manual implementations vs stl.
